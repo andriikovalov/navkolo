@@ -1,39 +1,31 @@
-import Phaser from 'phaser';
-import logoImg from './assets/logo.png';
+import Phaser from 'phaser'
+import Game from './game'
 
-class MyGame extends Phaser.Scene
-{
-    constructor ()
-    {
-        super();
-    }
+import './game.css'
 
-    preload ()
-    {
-        this.load.image('logo', logoImg);
-    }
-      
-    create ()
-    {
-        const logo = this.add.image(400, 150, 'logo');
-      
-        this.tweens.add({
-            targets: logo,
-            y: 450,
-            duration: 2000,
-            ease: "Power2",
-            yoyo: true,
-            loop: -1
-        });
-    }
+const GAME_CONTAINER_DIV_ID = 'game-container'
+
+if (!document.getElementById(GAME_CONTAINER_DIV_ID)) {
+  const gameContainer = document.createElement('div')
+  gameContainer.id = GAME_CONTAINER_DIV_ID
+  document.body.appendChild(gameContainer)
 }
 
-const config = {
-    type: Phaser.AUTO,
-    parent: 'phaser-example',
-    width: 800,
-    height: 600,
-    scene: MyGame
-};
+window.navkolo = {}
 
-const game = new Phaser.Game(config);
+window.navkolo.default_config = {
+  type: Phaser.AUTO,
+  parent: GAME_CONTAINER_DIV_ID,
+  dom: {
+    createContainer: true
+  },
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH
+  },
+  width: 1366,
+  height: 768,
+  scene: Game
+}
+
+window.navkolo.game = new Phaser.Game(window.navkolo.default_config)
