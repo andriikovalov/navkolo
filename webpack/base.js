@@ -23,7 +23,7 @@ module.exports = {
       },
       {
         test: /assets\S*\.svg$/,
-        type: 'asset/resource'
+        type: 'asset/source'
       }
     ]
   },

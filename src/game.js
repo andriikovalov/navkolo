@@ -3,8 +3,19 @@ import leftArrow from './assets/svg/left_arrow.svg'
 import rightArrow from './assets/svg/right_arrow.svg'
 import upArrow from './assets/svg/up_arrow.svg'
 import downArrow from './assets/svg/down_arrow.svg'
+import gear from './assets/svg/gear.svg'
 
 export default class Game extends Phaser.Scene {
+  constructor (gameConfig) {
+    super()
+
+    /**
+     * Complete game config as JSON object.
+     * @member {Object.<string, Object>}
+     */
+    this.gameConfig = gameConfig
+  }
+
   init () {
     /**
      * Dictionary of all general UI objects (such as message box, input field, loading image).
@@ -101,17 +112,6 @@ export default class Game extends Phaser.Scene {
     this.gameState.alternativeNextActions = null
   }
 
-  preload () {
-    this.load.svg('left_arrow', leftArrow)
-    this.load.svg('right_arrow', rightArrow)
-    this.load.svg('up_arrow', upArrow)
-    this.load.svg('down_arrow', downArrow)
-  }
-
-  create () {
-    this.createGeneralUI()
-  }
-
   gameWidth () {
     return this.cameras.main.width
   }
@@ -120,19 +120,60 @@ export default class Game extends Phaser.Scene {
     return this.cameras.main.height
   }
 
-  createGeneralUI () {
-    this.createArrow(0.0583 * this.gameWidth(), 0.5 * this.gameHeight(), 'left', 'left_arrow')
-    this.createArrow(0.9417 * this.gameWidth(), 0.5 * this.gameHeight(), 'right', 'right_arrow')
-    this.createArrow(0.5 * this.gameWidth(), 0.1 * this.gameHeight(), 'up', 'up_arrow')
-    this.createArrow(0.5 * this.gameWidth(), 0.9 * this.gameHeight(), 'down', 'down_arrow')
+  create () {
+    this.createSvgUi()
+  }
 
-    // create_code_input(phaser_scene);
-    // create_message_box(phaser_scene);
-    // create_blocking_message_box(phaser_scene);
-    // create_alternative_message_box(phaser_scene);
+  createSvgUi () {
+    // Counts how many svg files we need to load, to remove the listener when we are done
+    let svgImageQueued = 5
 
-    // create_fade_rectangle(phaser_scene);
-    // create_loading_indicator(phaser_scene);
+    const addTextureListener = (key) => {
+      console.log(key)
+      switch (key) {
+        case 'left_arrow':
+          this.createArrow(0.0583 * this.gameWidth(), 0.5 * this.gameHeight(), 'left', 'left_arrow')
+          svgImageQueued -= 1
+          break
+        case 'right_arrow':
+          this.createArrow(0.9417 * this.gameWidth(), 0.5 * this.gameHeight(), 'right', 'right_arrow')
+          svgImageQueued -= 1
+          break
+        case 'up_arrow':
+          this.createArrow(0.5 * this.gameWidth(), 0.1 * this.gameHeight(), 'up', 'up_arrow')
+          svgImageQueued -= 1
+          break
+        case 'down_arrow':
+          this.createArrow(0.5 * this.gameWidth(), 0.9 * this.gameHeight(), 'down', 'down_arrow')
+          svgImageQueued -= 1
+          break
+        case 'loading':
+          this.createLoadingIndicator()
+          svgImageQueued -= 1
+          break
+      }
+      if (svgImageQueued === 0) {
+        console.log('TODO: remove')
+        this.textures.removeListener('addtexture', addTextureListener)
+      }
+    }
+
+    this.textures.on('addtexture', addTextureListener)
+
+    this.addSvgTexture(leftArrow, 'left_arrow')
+    this.addSvgTexture(rightArrow, 'right_arrow')
+    this.addSvgTexture(upArrow, 'up_arrow')
+    this.addSvgTexture(downArrow, 'down_arrow')
+    this.addSvgTexture(gear, 'loading')
+  }
+
+  addSvgTexture (svgText, key) {
+    const imageData = 'data:image/svg+xml,' + encodeURIComponent(svgText)
+    const image = new Image()
+    image.src = imageData
+    image.onload = () => {
+      this.textures.addImage(key, image)
+    }
   }
 
   createArrow (x, y, objectName, imageId) {
@@ -159,5 +200,30 @@ export default class Game extends Phaser.Scene {
     arrow.on('pointerout', () => {
       arrow.setAlpha(0.7)
     })
+  }
+
+  createLoadingIndicator () {
+    const indicatorSize = 0.0833 * this.gameWidth()
+    this.uiElements.loading = this.add.image(this.gameWidth() / 2, this.gameHeight() / 2, 'loading')
+      .setDepth(1000)
+      .setDisplaySize(indicatorSize, indicatorSize)
+      .setAlpha(0.7)
+      // .setVisible(false)
+
+    this.tweens.add({
+      targets: this.uiElements.loading,
+      angle: 360,
+      duration: 5000,
+      loop: -1
+    })
+  }
+
+  createGeneralUI () {
+    // create_code_input(phaser_scene);
+    // create_message_box(phaser_scene);
+    // create_blocking_message_box(phaser_scene);
+    // create_alternative_message_box(phaser_scene);
+
+    // create_fade_rectangle(phaser_scene);
   }
 }
