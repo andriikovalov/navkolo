@@ -26,7 +26,7 @@ body {
   padding: 20px;
 }
 
-.message_box_button_container {
+#message_box_button_container {
   text-align: center;
 }
 
