@@ -27,6 +27,22 @@ export default class Game extends Phaser.Scene {
     this.uiElements = {}
 
     /**
+     * Dictionary from action type to a function that processes it. Should be bound to this Game and take action JSON as a parameter.
+     */
+    this.actionHandlers = {}
+
+    /**
+     * Dictionary from guard type to a function that checks it. Should be bound to this Game and take guard JSON as a parameter.
+     */
+    this.guardCheckers = {}
+
+    /**
+     * Dictionary of game parameters such as default values.
+     * @member {Object.<string, Object>}
+     */
+    this.gameParameters = this.defaultGameParameters()
+
+    /**
      * Collection of information about game world as it is discovered. Values here are not supposed to change.
      */
     this.gameDescription = {}
@@ -117,6 +133,15 @@ export default class Game extends Phaser.Scene {
     this.gameState.nextActions = null
   }
 
+  defaultGameParameters () {
+    const parameters = {}
+    parameters.sceneBackgroundImagesPath = ''
+    parameters.audiosPath = ''
+    parameters.defaultMessageBoxSingleButtonText = 'Continue'
+
+    return parameters
+  }
+
   gameWidth () {
     return this.cameras.main.width
   }
@@ -127,7 +152,14 @@ export default class Game extends Phaser.Scene {
 
   create () {
     this.createSvgUi()
-    this.createHtmlUi()
+    this.createCodeInput()
+    this.createMessageBox()
+    this.createFadeRectangle()
+
+    this.registerActionHandlers()
+    this.registerGuardCheckers()
+
+    this.startGame()
   }
 
   createSvgUi () {
@@ -221,11 +253,6 @@ export default class Game extends Phaser.Scene {
     })
   }
 
-  createHtmlUi () {
-    this.createCodeInput()
-    this.createMessageBox()
-  }
-
   createCodeInput () {
     const input = this.add.dom(0.5 * this.gameWidth(), 0.9167 * this.gameHeight()).createFromHTML(inputHtml)
     input.setDepth(100)
@@ -266,13 +293,156 @@ export default class Game extends Phaser.Scene {
     })
   }
 
-  createGeneralUI () {
-    // create_code_input(phaser_scene);
-    // create_message_box(phaser_scene);
-    // create_blocking_message_box(phaser_scene);
-    // create_alternative_message_box(phaser_scene);
+  createFadeRectangle () {
+    this.uiElements.fadeRectangle = this.add.rectangle(0, 0, this.gameWidth(), this.gameHeight(), 0xffff00)
+      .setAlpha(0)
+      .setOrigin(0, 0)
+      .setDepth(10)
+  }
 
-    // create_fade_rectangle(phaser_scene);
+  registerActionHandlers () {
+    // TODO
+  }
+
+  registerGuardCheckers () {
+    // TODO
+  }
+
+  startGame () {
+    console.log('Starting game')
+  }
+
+  loadStage (stage) {
+    this.uiElements.loading.setVisible(true)
+    this.gameState.loadedStages.add(stage.id)
+    if (('scenes' in stage && stage.scenes.length > 0) || 'audio' in stage) {
+      this.preloadStage(stage)
+      this.load.start()
+      this.load.once('complete', this.createStage.bind(this, stage))
+    } else {
+      this.createStage(stage)
+    }
+  }
+
+  preloadStage (stage) {
+    if ('scenes' in stage) {
+      this.preloadSceneBackgrounds(stage.scenes)
+    }
+    if ('audio' in stage) {
+      this.preloadAudio(stage.audio)
+    }
+  }
+
+  preloadSceneBackgrounds (scenes) {
+    for (const scene of scenes) {
+      this.load.image(this.getSceneBgImageKey(scene), this.getSceneBgImageUrl(scene))
+    }
+  }
+
+  preloadAudio (audio) {
+    for (const audioKey in audio) {
+      if (!(audioKey in this.gameDescription.audio)) {
+        const audioUrls = audio[audioKey].map(fileName => this.getAudioUrl(fileName))
+        this.load.audio(audioKey, audioUrls)
+      }
+    }
+  }
+
+  getSceneBgImageKey (scene) {
+    return scene.id + '_bg'
+  }
+
+  getSceneBgImageUrl (scene) {
+    return this.gameParameters.sceneBackgroundImagesPath + scene.background
+  }
+
+  getAudioUrl (audioFileName) {
+    return this.gameParameters.audiosPath + audioFileName
+  }
+
+  createStage (stage) {
+    this.createObjects(stage)
+    this.createScenes(stage)
+    this.createAudio(stage)
+    this.createProcedures(stage)
+
+    this.uiElements.loading.setVisible(false)
+
+    if ('load_actions' in stage) {
+      this.processActions(stage.load_actions)
+    }
+  }
+
+  createObjects (stage) {
+    for (const object of this.gatherObjects(stage)) {
+      this.createObject(object)
+    }
+  }
+
+  gatherObjects (stage) {
+    const objects = []
+    for (const scene of stage.scenes) {
+      if ('objects' in scene) {
+        for (const object of scene.objects) {
+          objects.push(object)
+        }
+      }
+    }
+    return objects
+  }
+
+  createObject (object) {
+    const phaserObject = this.add.rectangle(object.x * this.gameWidth(), object.y * this.gameHeight(), object.width * this.gameWidth(), object.height * this.gameHeight())
+      .setInteractive({ useHandCursor: true })
+      .setAlpha(0.000001)
+      .setVisible(false)
+
+    phaserObject.on('pointerdown', (_pointer, _localX, _localY, event) => {
+      this.objectClicked(object.id)
+      event.stopPropagation()
+    })
+
+    this.gameDescription.objects[object.id] = phaserObject
+  }
+
+  createScenes (stage) {
+    for (const scene of stage.scenes) {
+      if ('interactive_inherit' in scene) {
+        const baseScene = this.gameDescription.scenes[scene.interactive_inherit]
+        scene.interactive = Object.assign({}, baseScene.interactive, scene.interactive)
+      }
+      this.gameDescription.scenes[scene.id] = scene
+
+      this.gameDescription.backgrounds[scene.id] = this.add.image(0, 0, this.getSceneBgImageKey(scene))
+        .setOrigin(0, 0)
+        .setDisplaySize(this.gameWidth(), this.gameHeight())
+        .setVisible(false)
+        .setDepth(-1)
+    }
+  }
+
+  createAudio (stage) {
+    if ('audio' in stage) {
+      for (const audioKey in stage.audio) {
+        if (!(audioKey in this.gameDescription.audio)) {
+          this.gameDescription.audio[audioKey] = this.sound.add(audioKey)
+        }
+      }
+    }
+  }
+
+  createProcedures (stage) {
+    for (const scene of stage.scenes) {
+      if ('procedures' in scene) {
+        for (const procedureName in scene.procedures) {
+          this.gameDescription.procedures[procedureName] = scene.procedures[procedureName]
+        }
+      }
+    }
+  }
+
+  processActions (actions) {
+    console.log('TODO: process actions')
   }
 
   submitCode () {
@@ -292,9 +462,5 @@ export default class Game extends Phaser.Scene {
     // const cur_scene_id = phaser_scene.gameState.currentSceneId;
     // const interactions = phaser_scene.gameDescription.scenes[cur_scene_id].interactive[object_name];
     // process_actions(phaser_scene, interactions);
-  }
-
-  processActions (actions) {
-    console.log('TODO: process actions')
   }
 }
