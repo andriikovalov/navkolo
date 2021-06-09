@@ -305,7 +305,10 @@ export default class Game extends Phaser.Scene {
   }
 
   registerGuardCheckers () {
-    // TODO
+    this.guardCheckers.variable = guard => this.gameState.variables[guard.variable] === guard.value
+    this.guardCheckers.puzzle_solved = guard => guard.puzzle in this.gameState.correctAnswers
+    this.guardCheckers.scene_visited = guard => this.gameState.visitedScenes.has(guard.scene)
+    this.guardCheckers.stage_loaded = guard => this.gameState.loadedStages.has(guard.stage)
   }
 
   startGame () {
@@ -443,6 +446,25 @@ export default class Game extends Phaser.Scene {
 
   processActions (actions) {
     console.log('TODO: process actions')
+  }
+
+  checkGuard (guard) {
+    let result
+    if ('and' in guard) {
+      for (const nestedGuard of guard.and) {
+        result = this.checkGuard(nestedGuard)
+        if (result === false) {
+          break
+        }
+      }
+    } else if ('type' in guard) {
+      result = this.guardCheckers[guard.type](guard)
+    }
+
+    if (guard.not) {
+      result = !result
+    }
+    return result
   }
 
   submitCode () {
