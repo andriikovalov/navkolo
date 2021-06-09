@@ -301,7 +301,41 @@ export default class Game extends Phaser.Scene {
   }
 
   registerActionHandlers () {
-    // TODO
+    this.actionHandlers.go_to_scene = action => this.changeScene(action.scene)
+    this.actionHandlers.show_text = action => this.showText(action.text)
+    this.actionHandlers.set_variable = action => { this.gameState.variables[action.variable] = action.value }
+    this.actionHandlers.increment_variable = action => {
+      const oldValue = this.gameState.variables[action.variable]
+      const increment = 'increment' in action ? action.increment : 1
+      this.gameState.variables[action.variable] = oldValue + increment
+    }
+    this.actionHandlers.blocking_text = action => {
+      const buttonName = 'button' in action ? action.button : this.gameParameters.defaultMessageBoxSingleButtonText
+      this.showBlockingMessage(action.text, [action.next], [buttonName])
+    }
+    this.actionHandlers.alternative = action => this.showBlockingMessage(action.text, action.alternatives, action.buttons)
+    this.actionHandlers.background_fade_tween = action => this.backgroundFadeTween(action)
+    // } else if (action.type === 'enter_code') {
+    //   process_code(phaser_scene, action.puzzle, action.code)
+    // } else if (action.type === 'set_background_music') {
+    //   set_background_music(phaser_scene, action.audio, action.audio_config)
+    // } else if (action.type === 'background_music_tween') {
+    //   background_music_tween(phaser_scene, action)
+    // } else if (action.type === 'play_audio') {
+    //   play_audio(phaser_scene, action.audio, action.audio_config)
+    // } else if (action.type === 'stop_audio') {
+    //   stop_audio(phaser_scene, action.audio)
+    // } else if (action.type === 'hide_interactive_elements') {
+    //   hide_current_interactive_elements(phaser_scene)
+    // } else if (action.type === 'delayed_actions') {
+    //   delayed_actions(phaser_scene, action.delay, action.next)
+    // } else if (action.type === 'grouped_actions') {
+    //   process_actions(phaser_scene, action.next)
+    // } else if (action.type === 'run_procedure') {
+    //   process_actions(phaser_scene, phaser_scene.gameDescription.procedures[action.procedure])
+    // } else if (action.type === 'redirect') {
+    //   window.location.replace(action.url)
+    // }
   }
 
   registerGuardCheckers () {
@@ -445,7 +479,16 @@ export default class Game extends Phaser.Scene {
   }
 
   processActions (actions) {
-    console.log('TODO: process actions')
+    for (const action of actions) {
+      this.processAction(action)
+    }
+  }
+
+  processAction (action) {
+    if ('guard' in action && !this.checkGuard(action.guard)) {
+      return
+    }
+    this.actionHandlers[action.type](action)
   }
 
   checkGuard (guard) {
@@ -484,5 +527,27 @@ export default class Game extends Phaser.Scene {
     // const cur_scene_id = phaser_scene.gameState.currentSceneId;
     // const interactions = phaser_scene.gameDescription.scenes[cur_scene_id].interactive[object_name];
     // process_actions(phaser_scene, interactions);
+  }
+
+  changeScene (newSceneId) {
+
+  }
+
+  showText (text) {
+
+  }
+
+  /**
+   * Shows a message box with buttons and blocks all other UI
+   * @param {string} text Text to show in the message box
+   * @param {Array.<Array.<Object>>} alternativeActions Array of possible alternatives which are arrays of JSON actions
+   * @param {Array.<string>} buttonNames Button captions in the same order and of the same size as the alternative actions
+   */
+  showBlockingMessage (text, alternativeActions, buttonNames) {
+
+  }
+
+  backgroundFadeTween (action) {
+
   }
 }
