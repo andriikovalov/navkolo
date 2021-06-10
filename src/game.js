@@ -95,10 +95,10 @@ export default class Game extends Phaser.Scene {
     this.gameState.currentSceneId = null
 
     /**
-     * The key of the currently set background music.
+     * The key of the currently set background audio.
      * @member {string}
      */
-    this.gameState.backgroundMusicId = null
+    this.gameState.backgroundAudioKey = null
 
     /**
      * Values of in-game variables.
@@ -302,40 +302,37 @@ export default class Game extends Phaser.Scene {
 
   registerActionHandlers () {
     this.actionHandlers.go_to_scene = action => this.changeScene(action.scene)
+    this.actionHandlers.enter_code = action => this.processCode(action.puzzle, action.code)
+
     this.actionHandlers.show_text = action => this.showText(action.text)
+    this.actionHandlers.blocking_text = action => {
+      const buttonName = 'button' in action ? action.button : this.gameParameters.defaultMessageBoxSingleButtonText
+      this.showBlockingMessage(action.text, [action.next], [buttonName])
+    }
+    this.actionHandlers.alternative = action => this.showBlockingMessage(action.text, action.alternatives, action.buttons)
+
     this.actionHandlers.set_variable = action => { this.gameState.variables[action.variable] = action.value }
     this.actionHandlers.increment_variable = action => {
       const oldValue = this.gameState.variables[action.variable]
       const increment = 'increment' in action ? action.increment : 1
       this.gameState.variables[action.variable] = oldValue + increment
     }
-    this.actionHandlers.blocking_text = action => {
-      const buttonName = 'button' in action ? action.button : this.gameParameters.defaultMessageBoxSingleButtonText
-      this.showBlockingMessage(action.text, [action.next], [buttonName])
-    }
-    this.actionHandlers.alternative = action => this.showBlockingMessage(action.text, action.alternatives, action.buttons)
-    this.actionHandlers.background_fade_tween = action => this.backgroundFadeTween(action)
-    // } else if (action.type === 'enter_code') {
-    //   process_code(phaser_scene, action.puzzle, action.code)
-    // } else if (action.type === 'set_background_music') {
-    //   set_background_music(phaser_scene, action.audio, action.audio_config)
-    // } else if (action.type === 'background_music_tween') {
-    //   background_music_tween(phaser_scene, action)
-    // } else if (action.type === 'play_audio') {
-    //   play_audio(phaser_scene, action.audio, action.audio_config)
-    // } else if (action.type === 'stop_audio') {
-    //   stop_audio(phaser_scene, action.audio)
+
+    this.actionHandlers.background_fade_tween = action => this.backgroundFadeTween(action.tween)
+
+    this.actionHandlers.set_background_music = action => this.setBackgroundAudio(action.audio, action.audio_config)
+    this.actionHandlers.background_music_tween = action => this.backgroundAudioTween(action.tween)
+    this.actionHandlers.play_audio = action => this.playAudio(action.audio, action.audio_config)
+    this.actionHandlers.stop_audio = action => this.stopAudio(action.audio)
+
+    this.actionHandlers.grouped_actions = action => this.processActions(action.next)
+    this.actionHandlers.run_procedure = action => this.processActions(this.gameDescription.procedures[action.procedure])
+    this.actionHandlers.delayed_actions = action => setTimeout(this.processActions, action.delay, action.next)
+
+    this.actionHandlers.redirect = action => window.location.replace(action.url)
+
     // } else if (action.type === 'hide_interactive_elements') {
     //   hide_current_interactive_elements(phaser_scene)
-    // } else if (action.type === 'delayed_actions') {
-    //   delayed_actions(phaser_scene, action.delay, action.next)
-    // } else if (action.type === 'grouped_actions') {
-    //   process_actions(phaser_scene, action.next)
-    // } else if (action.type === 'run_procedure') {
-    //   process_actions(phaser_scene, phaser_scene.gameDescription.procedures[action.procedure])
-    // } else if (action.type === 'redirect') {
-    //   window.location.replace(action.url)
-    // }
   }
 
   registerGuardCheckers () {
@@ -511,8 +508,13 @@ export default class Game extends Phaser.Scene {
   }
 
   submitCode () {
-    console.log('Submitting from')
-    console.log(this)
+    const code = document.getElementById('code_input').value
+    const puzzle = this.gameDescription.scenes[this.gameState.currentSceneId].puzzle
+    this.processCode(this, puzzle, code)
+  }
+
+  processCode (puzzle, code) {
+
   }
 
   showHint (hintIndex) {
@@ -547,7 +549,42 @@ export default class Game extends Phaser.Scene {
 
   }
 
-  backgroundFadeTween (action) {
+  backgroundFadeTween (actionTween) {
+    const fadeRect = this.uiElements.fadeRectangle
 
+    this.tweens.killTweensOf(fadeRect)
+    const tween = Object.assign({ targets: fadeRect }, actionTween)
+    this.tweens.add(tween)
+  }
+
+  backgroundAudioTween (actionTween) {
+    const bgAudioKey = this.gameState.backgroundAudioKey
+    const bgAudio = this.gameDescription.audio[bgAudioKey]
+
+    this.tweens.killTweensOf(bgAudio)
+    const tween = Object.assign({ targets: bgAudio }, actionTween)
+    this.tweens.add(tween)
+  }
+
+  setBackgroundAudio (audioKey, audioConfig) {
+    const currentBgAudioKey = this.gameState.backgroundAudioKey
+
+    if (currentBgAudioKey !== audioKey) {
+      if (currentBgAudioKey !== null) {
+        this.gameDescription.audio[currentBgAudioKey].stop()
+      }
+      this.gameState.backgroundAudioKey = audioKey
+      if (audioKey !== null) {
+        this.gameDescription.audio[audioKey].play(Object.assign({ loop: true }, audioConfig))
+      }
+    }
+  }
+
+  playAudio (audioKey, audioConfig) {
+    this.gameDescription.audio[audioKey].play(audioConfig)
+  }
+
+  stopAudio (audioKey) {
+    this.gameDescription.audio[audioKey].stop()
   }
 }
