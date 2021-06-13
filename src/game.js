@@ -148,6 +148,19 @@ export default class Game extends Phaser.Scene {
     parameters.defaultMessageBoxSingleButtonText = 'Continue'
     parameters.puzzleLockedByOtherPuzzleMessage = 'Solve another riddle first'
     parameters.puzzleLockedByOtherPuzzlesMessage = 'Solve other riddles first'
+    parameters.defaultWrongCodeActions = [
+      {
+        type: 'show_text',
+        text: 'Wrong code'
+      }
+    ]
+
+    parameters.defaultRediscoveredStageActions = [
+      {
+        type: 'show_text',
+        text: 'Nothing happens'
+      }
+    ]
 
     return parameters
   }
@@ -539,12 +552,66 @@ export default class Game extends Phaser.Scene {
   }
 
   processCode (puzzle, code) {
+    this.hideMessageIfOpen()
 
+    const puzzleConfig = this.gameConfig.puzzles[puzzle]
+    if ('code' in puzzleConfig) {
+      this.checkCode(puzzle, code, puzzleConfig.code, puzzleConfig.stage)
+    } else if ('codes' in puzzleConfig) {
+      for (const altCode in puzzleConfig.codes) {
+        this.checkCode(puzzle, code, altCode, puzzleConfig.codes[altCode])
+      }
+    }
+  }
+
+  checkCode (puzzle, code, expectedCode, nextStage) {
+    if (this.compareCode(code, expectedCode)) {
+      this.processCorrectCode(puzzle, code, nextStage)
+    } else {
+      this.processWrongCode()
+    }
+  }
+
+  /**
+   * Compares the code given by the player to the expected correct code.
+   * @param {string} givenCode
+   * @param {string} expectedCode
+   * @returns true if the given code matches the expected code
+   */
+  compareCode (givenCode, expectedCode) {
+    return givenCode.trim().toUpperCase() === expectedCode.toUpperCase()
+  }
+
+  processCorrectCode (puzzle, code, newStage) {
+    if (this.gameState.loadedStages.has(newStage)) {
+      this.processActions(this.gameParameters.defaultRediscoveredStageActions)
+    } else {
+      this.gameState.correctAnswers[puzzle] = code
+      if (this.gameState.currentSceneId !== null &&
+          'puzzle' in this.currentScene()) {
+        this.showCodeInput()
+      }
+      const newStageConfig = this.gameConfig.stages.find(st => st.id === newStage)
+      this.loadStage(newStageConfig)
+    }
+  }
+
+  processWrongCode () {
+    const scene = this.currentScene()
+    document.getElementById('code_input').value = ''
+    if ('wrong_code_actions' in scene) {
+      this.processActions(scene.wrong_code_actions)
+    } else {
+      this.processActions(this.gameParameters.defaultWrongCodeActions)
+    }
   }
 
   showHint (hintIndex) {
-    console.log('Hint ' + hintIndex + ' from')
-    console.log(this)
+    const puzzle = this.currentScene().puzzle
+    const hint = this.gameConfig.puzzles[puzzle].hints[hintIndex]
+
+    this.hideMessageIfOpen()
+    this.showText(hint)
   }
 
   objectClicked (objectName) {
