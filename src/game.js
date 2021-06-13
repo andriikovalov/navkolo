@@ -19,6 +19,14 @@ export default class Game extends Phaser.Scene {
     this.gameConfig = gameConfig
   }
 
+  /**
+   * Pass a URL for a JSON game config file
+   * @param {string} gameConfigUrl
+   */
+  loadGameConfig (gameConfigUrl) {
+    this.gameConfigUrl = gameConfigUrl
+  }
+
   init () {
     /**
      * Dictionary of all general UI objects (such as message box, input field, loading image).
@@ -138,6 +146,8 @@ export default class Game extends Phaser.Scene {
     parameters.sceneBackgroundImagesPath = ''
     parameters.audiosPath = ''
     parameters.defaultMessageBoxSingleButtonText = 'Continue'
+    parameters.puzzleLockedByOtherPuzzleMessage = 'Solve another riddle first'
+    parameters.puzzleLockedByOtherPuzzlesMessage = 'Solve other riddles first'
 
     return parameters
   }
@@ -150,6 +160,16 @@ export default class Game extends Phaser.Scene {
     return this.cameras.main.height
   }
 
+  currentScene () {
+    return this.gameDescription.scenes[this.gameState.currentSceneId]
+  }
+
+  preload () {
+    if (this.gameConfigUrl) {
+      this.load.json('config', this.gameConfigUrl)
+    }
+  }
+
   create () {
     this.createSvgUi()
     this.createCodeInput()
@@ -158,6 +178,10 @@ export default class Game extends Phaser.Scene {
 
     this.registerActionHandlers()
     this.registerGuardCheckers()
+
+    if (this.gameConfigUrl) {
+      this.gameConfig = this.cache.json.get('config')
+    }
 
     this.startGame()
   }
@@ -289,6 +313,8 @@ export default class Game extends Phaser.Scene {
       event.preventDefault()
       const actions = this.nextActions[index]
       this.nextActions = null
+      this.uiElements.message.setVisible(false)
+      this.showCurrentInteractiveElements()
       this.processActions(actions)
     })
   }
@@ -329,10 +355,9 @@ export default class Game extends Phaser.Scene {
     this.actionHandlers.run_procedure = action => this.processActions(this.gameDescription.procedures[action.procedure])
     this.actionHandlers.delayed_actions = action => setTimeout(this.processActions, action.delay, action.next)
 
-    this.actionHandlers.redirect = action => window.location.replace(action.url)
+    this.actionHandlers.hide_interactive_elements = _ => this.hideCurrentInteractiveElements()
 
-    // } else if (action.type === 'hide_interactive_elements') {
-    //   hide_current_interactive_elements(phaser_scene)
+    this.actionHandlers.redirect = action => window.location.replace(action.url)
   }
 
   registerGuardCheckers () {
@@ -509,7 +534,7 @@ export default class Game extends Phaser.Scene {
 
   submitCode () {
     const code = document.getElementById('code_input').value
-    const puzzle = this.gameDescription.scenes[this.gameState.currentSceneId].puzzle
+    const puzzle = this.currentScene().puzzle
     this.processCode(this, puzzle, code)
   }
 
@@ -523,20 +548,72 @@ export default class Game extends Phaser.Scene {
   }
 
   objectClicked (objectName) {
-    console.log('Clicked ' + objectName)
-    // hide_message_if_open(phaser_scene);
+    this.hideMessageIfOpen()
 
-    // const cur_scene_id = phaser_scene.gameState.currentSceneId;
-    // const interactions = phaser_scene.gameDescription.scenes[cur_scene_id].interactive[object_name];
-    // process_actions(phaser_scene, interactions);
+    const interactions = this.currentScene().interactive[objectName]
+    this.processActions(interactions)
   }
 
   changeScene (newSceneId) {
+    if (this.gameState.currentSceneId !== null) {
+      this.leaveCurrentScene()
+    }
+    this.enter_scene(newSceneId)
+  }
 
+  leaveCurrentScene () {
+    this.hideCurrentInteractiveElements()
+    const curSceneId = this.gameState.currentSceneId
+    this.gameDescription.backgrounds[curSceneId].setVisible(false)
+    this.gameState.currentSceneId = null
+  }
+
+  enterScene (newSceneId) {
+    this.gameState.currentSceneId = newSceneId
+    this.gameDescription.backgrounds[newSceneId].setVisible(true)
+
+    const firstEntry = !this.gameState.visitedScenes.has(newSceneId)
+    if (firstEntry) {
+      this.gameState.visitedScenes.add(newSceneId)
+    }
+
+    this.showCurrentInteractiveElements()
+
+    const scene = this.currentScene()
+    if (firstEntry && 'first_entry_actions' in scene) {
+      this.processActions(scene.first_entry_actions)
+    }
+    if ('entry_actions' in scene) {
+      this.processActions(scene.entry_actions)
+    }
   }
 
   showText (text) {
+    const messageBox = this.uiElements.message
+    document.getElementById('message').innerHTML = text
+    document.getElementById('message_box_button_container').hidden = true
 
+    messageBox.node.style.display = 'block'
+    messageBox.updateSize()
+    messageBox.setVisible(true)
+
+    this.hideSceneObjects(obj => obj.object_type !== 'arrow')
+
+    this.input.on('pointerdown', () => {
+      this.hideMessage()
+    })
+  }
+
+  hideMessage () {
+    this.uiElements.message.setVisible(false)
+    this.input.removeListener('pointerdown')
+    this.showActiveSceneObjects()
+  }
+
+  hideMessageIfOpen () {
+    if (this.uiElements.message.visible) {
+      this.hideMessage()
+    }
   }
 
   /**
@@ -546,7 +623,40 @@ export default class Game extends Phaser.Scene {
    * @param {Array.<string>} buttonNames Button captions in the same order and of the same size as the alternative actions
    */
   showBlockingMessage (text, alternativeActions, buttonNames) {
+    const messageBox = this.uiElements.message
+    document.getElementById('message').innerHTML = text
+    document.getElementById('message_box_button_container').hidden = false
+    this.updateBlockingButtons(buttonNames)
 
+    messageBox.node.style.display = 'block'
+    messageBox.updateSize()
+    messageBox.setVisible(true)
+
+    this.hideSceneObjects()
+    this.setCodeInputElementsDisabled(true)
+
+    this.gameState.nextActions = alternativeActions
+  }
+
+  updateBlockingButtons (buttonNames) {
+    const buttonContainer = document.getElementById('message_box_button_container')
+    const existingButtons = buttonContainer.getElementsByTagName('button')
+
+    for (let i = 0; i < buttonNames.length; i++) {
+      if (existingButtons.length < i) {
+        existingButtons[i].hidden = false
+        existingButtons[i].innerHTML = buttonNames[i]
+      } else {
+        const newButton = existingButtons[0].cloneNode(false)
+        newButton.innerHTML = buttonNames[i]
+        this.addMessageBoxButtonHandler(newButton, i)
+        buttonContainer.appendChild(newButton)
+      }
+    }
+
+    for (let i = buttonNames.length; i < existingButtons.length; i++) {
+      existingButtons[i].hidden = true
+    }
   }
 
   backgroundFadeTween (actionTween) {
@@ -586,5 +696,108 @@ export default class Game extends Phaser.Scene {
 
   stopAudio (audioKey) {
     this.gameDescription.audio[audioKey].stop()
+  }
+
+  /**
+   * Sets visibility to false for all objects that have interactions in the current scene and pass the filter function
+   * @param {function(Object):boolean} filter function that will be called on every Phaser object representing a scene oblect
+   */
+  hideSceneObjects (filter = _ => true) {
+    const scene = this.currentScene()
+    if ('interactive' in scene) {
+      for (const objName in scene.interactive) {
+        const obj = this.gameDescription.objects[objName]
+        if (filter(obj)) {
+          obj.setVisible(false)
+        }
+      }
+    }
+  }
+
+  showActiveSceneObjects () {
+    const scene = this.currentScene()
+    if ('interactive' in scene) {
+      for (const objName in scene.interactive) {
+        const obj = this.gameDescription.objects[objName]
+        const interactions = scene.interactive[objName]
+        if (this.checkActiveInteraction(interactions)) {
+          obj.setVisible(true)
+        }
+      }
+    }
+  }
+
+  /**
+   * @param {Array.<Object>} interactions array of actions, possibly with guards
+   * @returns true if there is an interaction with a passing guard (or without a guard), otherwise false
+   */
+  checkActiveInteraction (interactions) {
+    for (const interaction of interactions) {
+      if (!('guard' in interaction) || this.checkGuard(interaction.guard)) {
+        return true
+      }
+    }
+    return false
+  }
+
+  hideCurrentInteractiveElements () {
+    this.hideSceneObjects()
+    if ('puzzle' in this.currentScene()) {
+      this.uiElements.input.setVisible(false)
+    }
+  }
+
+  showCurrentInteractiveElements () {
+    this.showActiveSceneObjects()
+    if ('puzzle' in this.currentScene()) {
+      this.showCodeInput()
+    }
+  }
+
+  showCodeInput () {
+    const scene = this.currentScene()
+    const puzzle = scene.puzzle
+
+    const codeInput = document.getElementById('code_input')
+    codeInput.hidden = scene.hide_code_input
+
+    this.uiElements.input.node.style.display = 'block'
+    this.uiElements.input.updateSize()
+    this.uiElements.input.setVisible(true)
+
+    if (puzzle in this.gameState.correctAnswers) {
+      this.setCodeInputElementsDisabled(true)
+      codeInput.value = this.gameState.correctAnswers[puzzle]
+    } else if (!this.currentPuzzleUnlocked()) {
+      this.setCodeInputElementsDisabled(true)
+      if (scene.puzzle_depends_on.length === 1) {
+        codeInput.value = this.gameParameters.puzzleLockedByOtherPuzzleMessage
+      } else {
+        codeInput.value = this.gameParameters.puzzleLockedByOtherPuzzlesMessage
+      }
+    } else {
+      this.setCodeInputElementsDisabled(false)
+      codeInput.value = ''
+    }
+  }
+
+  setCodeInputElementsDisabled (value) {
+    const inputElements = document.getElementsByClassName('code_input_element')
+    for (const inputElement of inputElements) {
+      inputElement.disabled = value
+    }
+  }
+
+  currentPuzzleUnlocked () {
+    const scene = this.currentScene()
+    if ('puzzle_depends_on' in scene) {
+      const neededSolutions = scene.puzzle_depends_on
+      for (const neededSolution of neededSolutions) {
+        if (!(neededSolution in this.gameState.correctAnswers)) {
+          return false
+        }
+      }
+    }
+    return true
   }
 }
