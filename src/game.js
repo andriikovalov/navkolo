@@ -380,8 +380,11 @@ export default class Game extends Phaser.Scene {
     this.guardCheckers.stage_loaded = guard => this.gameState.loadedStages.has(guard.stage)
   }
 
+  /**
+   * Default implementation loads the first stage in the config
+   */
   startGame () {
-    console.log('Starting game')
+    this.loadStage(this.gameConfig.stages[0])
   }
 
   loadStage (stage) {
