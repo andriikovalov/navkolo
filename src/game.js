@@ -302,9 +302,8 @@ export default class Game extends Phaser.Scene {
       this.submitCode()
     })
 
-    document.getElementById('hint1').addEventListener('pointerdown', this.showHint.bind(this, 0))
-    document.getElementById('hint2').addEventListener('pointerdown', this.showHint.bind(this, 1))
-    document.getElementById('hint3').addEventListener('pointerdown', this.showHint.bind(this, 2))
+    const hintButton = document.getElementById('hint_button_container').getElementsByTagName('button')[0]
+    hintButton.addEventListener('pointerdown', this.hintButtonHandler.bind(this, 0))
   }
 
   createMessageBox () {
@@ -318,18 +317,16 @@ export default class Game extends Phaser.Scene {
 
     // Initially there is only one button. If more buttons are needed later, they are added dynamically
     const messageBoxButton = document.getElementById('message_box_button_container').getElementsByTagName('button')[0]
-    this.addMessageBoxButtonHandler(messageBoxButton, 0)
+    messageBoxButton.addEventListener('pointerdown', this.messageBoxButtonHandler.bind(this, 0))
   }
 
-  addMessageBoxButtonHandler (buttonNode, index) {
-    buttonNode.addEventListener('pointerdown', (event) => {
-      event.preventDefault()
-      const actions = this.nextActions[index]
-      this.nextActions = null
-      this.uiElements.message.setVisible(false)
-      this.showCurrentInteractiveElements()
-      this.processActions(actions)
-    })
+  messageBoxButtonHandler (index, event) {
+    event.preventDefault()
+    const actions = this.nextActions[index]
+    this.nextActions = null
+    this.uiElements.message.setVisible(false)
+    this.showCurrentInteractiveElements()
+    this.processActions(actions)
   }
 
   createFadeRectangle () {
@@ -609,7 +606,7 @@ export default class Game extends Phaser.Scene {
     }
   }
 
-  showHint (hintIndex) {
+  hintButtonHandler (hintIndex) {
     const puzzle = this.currentScene().puzzle
     const hint = this.gameConfig.puzzles[puzzle].hints[hintIndex]
 
@@ -695,8 +692,9 @@ export default class Game extends Phaser.Scene {
   showBlockingMessage (text, alternativeActions, buttonNames) {
     const messageBox = this.uiElements.message
     document.getElementById('message').innerHTML = text
-    document.getElementById('message_box_button_container').hidden = false
-    this.updateBlockingButtons(buttonNames)
+    const buttonContainer = document.getElementById('message_box_button_container')
+    buttonContainer.hidden = false
+    this.updateButtons(buttonContainer, buttonNames, this.messageBoxButtonHandler)
 
     messageBox.node.style.display = 'block'
     messageBox.updateSize()
@@ -708,8 +706,16 @@ export default class Game extends Phaser.Scene {
     this.gameState.nextActions = alternativeActions
   }
 
-  updateBlockingButtons (buttonNames) {
-    const buttonContainer = document.getElementById('message_box_button_container')
+  /**
+   * Updates names of the buttons in the buttonContainer.
+   * If necessary, more buttons are created from the first button.
+   * For new buttons buttonHandler is added as a handler.
+   *
+   * @param {HTMLElement} buttonContainer DOM element which contains at least one button
+   * @param {Array.<string>} buttonNames
+   * @param {function(number, event)} buttonHandler handler function, which will be bound to this and the first parameter will be the index of the button in the container.
+   */
+  updateButtons (buttonContainer, buttonNames, buttonHandler) {
     const existingButtons = buttonContainer.getElementsByTagName('button')
 
     for (let i = 0; i < buttonNames.length; i++) {
@@ -719,7 +725,7 @@ export default class Game extends Phaser.Scene {
       } else {
         const newButton = existingButtons[0].cloneNode(false)
         newButton.innerHTML = buttonNames[i]
-        this.addMessageBoxButtonHandler(newButton, i)
+        newButton.addEventListener('pointerdown', buttonHandler.bind(this, i))
         buttonContainer.appendChild(newButton)
       }
     }
