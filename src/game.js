@@ -435,10 +435,15 @@ export default class Game extends Phaser.Scene {
   }
 
   createStage (stage) {
-    this.createObjects(stage)
-    this.createScenes(stage)
-    this.createAudio(stage)
-    this.createProcedures(stage)
+    if ('scenes' in stage) {
+      this.createObjects(stage)
+      this.createScenes(stage)
+      this.createProcedures(stage)
+    }
+
+    if ('audio' in stage) {
+      this.createAudio(stage)
+    }
 
     this.uiElements.loading.setVisible(false)
 
@@ -496,11 +501,9 @@ export default class Game extends Phaser.Scene {
   }
 
   createAudio (stage) {
-    if ('audio' in stage) {
-      for (const audioKey in stage.audio) {
-        if (!(audioKey in this.gameDescription.audio)) {
-          this.gameDescription.audio[audioKey] = this.sound.add(audioKey)
-        }
+    for (const audioKey in stage.audio) {
+      if (!(audioKey in this.gameDescription.audio)) {
+        this.gameDescription.audio[audioKey] = this.sound.add(audioKey)
       }
     }
   }
@@ -658,6 +661,7 @@ export default class Game extends Phaser.Scene {
   }
 
   showText (text) {
+    this.hideMessageIfOpen()
     const messageBox = this.uiElements.message
     document.getElementById('message').innerHTML = text
     document.getElementById('message_box_button_container').hidden = true
