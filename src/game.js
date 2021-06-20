@@ -162,6 +162,8 @@ export default class Game extends Phaser.Scene {
       }
     ]
 
+    parameters.defaultHintButtonNames = ['?', '??', '!']
+
     return parameters
   }
 
@@ -837,6 +839,10 @@ export default class Game extends Phaser.Scene {
     const codeInput = document.getElementById('code_input')
     codeInput.hidden = scene.hide_code_input
 
+    const hintButtonContainer = document.getElementById('hint_button_container')
+    const hintButtonNames = this.getHintButtonNames(puzzle)
+    this.updateButtons(hintButtonContainer, hintButtonNames, this.hintButtonHandler)
+
     this.uiElements.input.node.style.display = 'block'
     this.uiElements.input.updateSize()
     this.uiElements.input.setVisible(true)
@@ -854,6 +860,15 @@ export default class Game extends Phaser.Scene {
     } else {
       this.setCodeInputElementsDisabled(false)
       codeInput.value = ''
+    }
+  }
+
+  getHintButtonNames (puzzle) {
+    const puzzleConfig = this.gameConfig.puzzles[puzzle]
+    if ('hint_button_names' in puzzleConfig) {
+      return puzzleConfig.hint_button_names
+    } else {
+      return this.gameParameters.defaultHintButtonNames
     }
   }
 
