@@ -349,6 +349,7 @@ export default class Game extends Phaser.Scene {
     }
     this.actionHandlers.alternative = action => this.showBlockingMessage(action.text, action.alternatives, action.buttons)
 
+    this.actionHandlers.set_game_parameter = action => { this.gameParameters[action.parameter] = action.value }
     this.actionHandlers.set_variable = action => { this.gameState.variables[action.variable] = action.value }
     this.actionHandlers.increment_variable = action => {
       const oldValue = this.gameState.variables[action.variable]
@@ -426,12 +427,24 @@ export default class Game extends Phaser.Scene {
     return scene.id + '_bg'
   }
 
+  isAbsoluteUrl (url) {
+    return url.indexOf('http://') === 0 || url.indexOf('https://') === 0
+  }
+
   getSceneBgImageUrl (scene) {
-    return this.gameParameters.sceneBackgroundImagesPath + scene.background
+    if (this.isAbsoluteUrl(scene.background)) {
+      return scene.background
+    } else {
+      return this.gameParameters.sceneBackgroundImagesPath + scene.background
+    }
   }
 
   getAudioUrl (audioFileName) {
-    return this.gameParameters.audiosPath + audioFileName
+    if (this.isAbsoluteUrl(audioFileName)) {
+      return audioFileName
+    } else {
+      return this.gameParameters.audiosPath + audioFileName
+    }
   }
 
   createStage (stage) {
@@ -872,7 +885,8 @@ export default class Game extends Phaser.Scene {
     if ('hint_button_names' in puzzleConfig) {
       return puzzleConfig.hint_button_names
     } else {
-      return this.gameParameters.defaultHintButtonNames
+      const hintCount = puzzleConfig.hints.length
+      return this.gameParameters.defaultHintButtonNames.slice(0, hintCount)
     }
   }
 
