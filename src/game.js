@@ -566,7 +566,7 @@ export default class Game extends Phaser.Scene {
   submitCode () {
     const code = document.getElementById('code_input').value
     const puzzle = this.currentScene().puzzle
-    this.processCode(this, puzzle, code)
+    this.processCode(puzzle, code)
   }
 
   processCode (puzzle, code) {
@@ -574,20 +574,19 @@ export default class Game extends Phaser.Scene {
 
     const puzzleConfig = this.gameConfig.puzzles[puzzle]
     if ('code' in puzzleConfig) {
-      this.checkCode(puzzle, code, puzzleConfig.code, puzzleConfig.stage)
+      if (this.compareCode(code, puzzleConfig.code)) {
+        this.processCorrectCode(puzzle, code, puzzleConfig.stage)
+        return
+      }
     } else if ('codes' in puzzleConfig) {
       for (const altCode in puzzleConfig.codes) {
-        this.checkCode(puzzle, code, altCode, puzzleConfig.codes[altCode])
+        if (this.compareCode(code, altCode)) {
+          this.processCorrectCode(puzzle, code, puzzleConfig.codes[altCode])
+          return
+        }
       }
     }
-  }
-
-  checkCode (puzzle, code, expectedCode, nextStage) {
-    if (this.compareCode(code, expectedCode)) {
-      this.processCorrectCode(puzzle, code, nextStage)
-    } else {
-      this.processWrongCode()
-    }
+    this.processWrongCode()
   }
 
   /**
@@ -738,7 +737,7 @@ export default class Game extends Phaser.Scene {
     const existingButtons = buttonContainer.getElementsByTagName('button')
 
     for (let i = 0; i < buttonNames.length; i++) {
-      if (existingButtons.length < i) {
+      if (i < existingButtons.length) {
         existingButtons[i].hidden = false
         existingButtons[i].innerHTML = buttonNames[i]
       } else {
@@ -884,9 +883,11 @@ export default class Game extends Phaser.Scene {
     const puzzleConfig = this.gameConfig.puzzles[puzzle]
     if ('hint_button_names' in puzzleConfig) {
       return puzzleConfig.hint_button_names
-    } else {
+    } else if ('hints' in puzzleConfig) {
       const hintCount = puzzleConfig.hints.length
       return this.gameParameters.defaultHintButtonNames.slice(0, hintCount)
+    } else {
+      return []
     }
   }
 
