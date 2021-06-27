@@ -1,0 +1,226 @@
+{
+    "puzzles": {
+        "SERVICE_TO_STAGE1": {
+            "code": "",
+            "stage": "s1"
+        },
+        "SERVICE_TO_AUDIO": {
+            "code": "",
+            "stage": "audio1"
+        },
+        "SERVICE_TO_AUDIO2": {
+            "code": "",
+            "stage": "audio2"
+        }
+    },
+    "stages": [
+        {
+            "id": "initial",
+            "load_actions": [
+                {
+                    "type": "set_game_parameter",
+                    "parameter": "sceneBackgroundImagesPath",
+                    "value": "https://fakeimg.pl/1366x768/000/fff/?font_size=80&text="
+                },
+                {
+                    "type": "enter_code",
+                    "puzzle": "SERVICE_TO_STAGE1",
+                    "code": ""
+                }
+            ]
+        },
+        {
+            "id": "s1",
+            "load_actions": [
+                {
+                    "type": "go_to_scene",
+                    "scene": "home"
+                }
+            ],
+            "scenes": [
+                {
+                    "id": "home",
+                    "background": "Audio%0ACodes%0AVariables%0ABlocking",
+                    "objects": [
+                        {
+                            "id": "r1",
+                            "x": 0.5,
+                            "y": 0.2,
+                            "width": 0.5,
+                            "height": 0.1
+                        },
+                        {
+                            "id": "r2",
+                            "x": 0.5,
+                            "y": 0.4,
+                            "width": 0.5,
+                            "height": 0.1
+                        },
+                        {
+                            "id": "r3",
+                            "x": 0.5,
+                            "y": 0.6,
+                            "width": 0.5,
+                            "height": 0.1
+                        },
+                        {
+                            "id": "r4",
+                            "x": 0.5,
+                            "y": 0.8,
+                            "width": 0.5,
+                            "height": 0.1
+                        }
+                    ],
+                    "interactive": {
+                        "r1": [
+                            {
+                                "type": "enter_code",
+                                "puzzle": "SERVICE_TO_AUDIO",
+                                "code": ""
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "id": "audio1",
+            "audio": {
+                "bg1": [
+                    "https://ia800300.us.archive.org/34/items/CuttlefishSoundSynthesisLibraryForArduinoExampleSounds/_09_PhaseMod_Envelope.ogg"
+                ],
+                "bg2": [
+                    "https://ia800301.us.archive.org/10/items/RiverSound/river.ogg"
+                ],
+                "long_sound": [
+                    "https://ia800605.us.archive.org/21/items/MozziSoundSynthesisLibraryForArduinoExampleRecordings_814/_12_Samples.ogg"
+                ]
+            },
+            "load_actions": [
+                {
+                    "type": "go_to_scene",
+                    "scene": "audio1"
+                }
+            ],
+            "scenes": [
+                {
+                    "id": "audio1",
+                    "background": "Play Loud%0APlay Quiet%0AStop%0AStop BG",
+                    "entry_actions": [
+                        {
+                            "type": "set_background_music",
+                            "audio": "bg1"
+                        }
+                    ],
+                    "interactive": {
+                        "left": [
+                            {
+                                "type": "go_to_scene",
+                                "scene": "home"
+                            }
+                        ],
+                        "right": [
+                            {
+                                "type": "go_to_scene",
+                                "scene": "audio2"
+                            }
+                        ],
+                        "r1": [
+                            {
+                                "type": "play_audio",
+                                "audio": "long_sound",
+                                "audio_config": {
+                                    "volume": 1
+                                }
+                            }
+                        ],
+                        "r2": [
+                            {
+                                "type": "play_audio",
+                                "audio": "long_sound",
+                                "audio_config": {
+                                    "volume": 0.1
+                                }
+                            }
+                        ],
+                        "r3": [
+                            {
+                                "type": "stop_audio",
+                                "audio": "long_sound"
+                            }
+                        ],
+                        "r4": [
+                            {
+                                "type": "set_background_music",
+                                "audio": null
+                            }
+                        ]
+                    }
+                },
+                {
+                    "id": "audio2",
+                    "background": "Tween BG%0APlay More%0ALoad More%0A",
+                    "entry_actions": [
+                        {
+                            "type": "set_background_music",
+                            "audio": "bg2"
+                        }
+                    ],
+                    "interactive": {
+                        "left": [
+                            {
+                                "type": "go_to_scene",
+                                "scene": "audio1"
+                            }
+                        ],
+                        "r1": [
+                            {
+                                "type": "background_music_tween",
+                                "tween": {
+                                    "volume": 0,
+                                    "duration": 1000,
+                                    "yoyo": true,
+                                    "repeat": -1
+                                }
+                            }
+                        ],
+                        "r2": [
+                            {
+                                "guard": {
+                                    "type": "stage_loaded",
+                                    "stage": "audio2",
+                                    "not": true
+                                },
+                                "type": "show_text",
+                                "text": "Press load first"
+                            },
+                            {
+                                "guard": {
+                                    "type": "stage_loaded",
+                                    "stage": "audio2"
+                                },
+                                "type": "play_audio",
+                                "audio": "more"
+                            }
+                        ],
+                        "r3": [
+                            {
+                                "type": "enter_code",
+                                "puzzle": "SERVICE_TO_AUDIO2",
+                                "code": ""
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "id": "audio2",
+            "audio": {
+                "more": [
+                    "https://ia902306.us.archive.org/21/items/OneHundredWays/pebble7.ogg"
+                ]
+            }
+        }
+    ]
+}
