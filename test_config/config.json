@@ -41,6 +41,15 @@
         "dep2": {
             "code": "x",
             "stage": "dep2_solved"
+        },
+        "guarding": {
+            "code": "x",
+            "stage": "guarding_solved",
+            "hints": [
+                "Answer",
+                "is",
+                "x"
+            ]
         }
     },
     "stages": [
@@ -70,7 +79,7 @@
             "scenes": [
                 {
                     "id": "home",
-                    "background": "Audio%0ACodes%0AVariables%0ABlocking",
+                    "background": "Audio%0ACodes%0AVariables%0A",
                     "objects": [
                         {
                             "id": "r1",
@@ -102,6 +111,12 @@
                         }
                     ],
                     "interactive": {
+                        "right": [
+                            {
+                                "type": "go_to_scene",
+                                "scene": "home2"
+                            }
+                        ],
                         "r1": [
                             {
                                 "type": "enter_code",
@@ -119,6 +134,30 @@
                             {
                                 "type": "go_to_scene",
                                 "scene": "vars"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "id": "home2",
+                    "background": "Guards%0ASwitch%0ABlocking%0A",
+                    "interactive": {
+                        "left": [
+                            {
+                                "type": "go_to_scene",
+                                "scene": "home"
+                            }
+                        ],
+                        "r1": [
+                            {
+                                "type": "go_to_scene",
+                                "scene": "guards"
+                            }
+                        ],
+                        "r2": [
+                            {
+                                "type": "go_to_scene",
+                                "scene": "switch"
                             }
                         ]
                     }
@@ -189,7 +228,7 @@
                 },
                 {
                     "id": "vars",
-                    "background": "%2B1%0A-1%0AReset%0ACheck 0 - 2",
+                    "background": "%2B1%0A-1%0AReset%0AIs 0 - 2 ?",
                     "procedures": {
                         "var_reset": [
                             {
@@ -283,6 +322,118 @@
                                 },
                                 "type": "show_text",
                                 "text": "2"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "id": "guards",
+                    "background": "Top visited?%0ATop and right visited?%0A%0A",
+                    "puzzle": "guarding",
+                    "interactive": {
+                        "left": [
+                            {
+                                "type": "go_to_scene",
+                                "scene": "home2"
+                            }
+                        ],
+                        "right": [
+                            {
+                                "guard": {
+                                    "type": "puzzle_solved",
+                                    "puzzle": "guarding"
+                                },
+                                "type": "go_to_scene",
+                                "scene": "guards_r"
+                            }
+                        ],
+                        "up": [
+                            {
+                                "type": "go_to_scene",
+                                "scene": "guards_u"
+                            }
+                        ],
+                        "r1": [
+                            {
+                                "guard": {
+                                    "type": "scene_visited",
+                                    "scene": "guards_u"
+                                },
+                                "type": "show_text",
+                                "text": "Yes"
+                            }
+                        ],
+                        "r2": [
+                            {
+                                "guard": {
+                                    "and": [
+                                        {
+                                            "type": "scene_visited",
+                                            "scene": "guards_u"
+                                        },
+                                        {
+                                            "type": "scene_visited",
+                                            "scene": "guards_r"
+                                        }
+                                    ]
+                                },
+                                "type": "show_text",
+                                "text": "Yes"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "id": "guards_u",
+                    "background": "Up",
+                    "interactive": {
+                        "down": [
+                            {
+                                "type": "go_to_scene",
+                                "scene": "guards"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "id": "guards_r",
+                    "background": "Right",
+                    "interactive": {
+                        "left": [
+                            {
+                                "type": "go_to_scene",
+                                "scene": "guards"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "id": "switch",
+                    "background": "%0AClick me%0A%0A",
+                    "interactive": {
+                        "left": [
+                            {
+                                "type": "go_to_scene",
+                                "scene": "home2"
+                            }
+                        ],
+                        "r2": [
+                            {
+                                "type": "go_to_scene",
+                                "scene": "switch2"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "id": "switch2",
+                    "background": "https://fakeimg.pl/1366x768/fff/000/?font_size=80&text=%0AClick me%0A%0A",
+                    "interactive_inherit": "switch",
+                    "interactive": {
+                        "r2": [
+                            {
+                                "type": "go_to_scene",
+                                "scene": "switch"
                             }
                         ]
                     }
@@ -452,6 +603,14 @@
                 {
                     "type": "show_text",
                     "text": "Dep 2 solved"
+                }
+            ]
+        },
+        {
+            "id": "guarding_solved",
+            "load_actions": [
+                {
+                    "type": "show_interactive_elements"
                 }
             ]
         }
