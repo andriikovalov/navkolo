@@ -909,4 +909,46 @@ export default class Game extends Phaser.Scene {
     }
     return true
   }
+
+  activateMarkingMode () {
+    const marking = { xStart: 0, yStart: 0, xStop: 0, yStop: 0 }
+    const markingRect = this.add.rectangle(1, 1, 1, 1, 0x00ff00, 0.5)
+    const markingKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL)
+
+    markingKey.on('down', (event) => {
+      const pointer = this.input.activePointer
+      marking.xStart = pointer.worldX
+      marking.yStart = pointer.worldY
+    })
+
+    markingKey.on('up', (event) => {
+      const pointer = this.input.activePointer
+      marking.xStop = pointer.worldX
+      marking.yStop = pointer.worldY
+      const x = (marking.xStop + marking.xStart) / 2 / this.gameWidth()
+      const y = (marking.yStop + marking.yStart) / 2 / this.gameHeight()
+      const w = Math.abs(marking.xStop - marking.xStart) / this.gameWidth()
+      const h = Math.abs(marking.yStop - marking.yStart) / this.gameHeight()
+      const text = '"x": ' + x.toFixed(4) + ',\n"y": ' + y.toFixed(4) + ',\n"width": ' + w.toFixed(4) + ',\n"height": ' + h.toFixed(4)
+      alert(text)
+    })
+
+    this.events.on('update', () => {
+      if (markingKey.isDown) {
+        const pointer = this.input.activePointer
+        marking.xStop = pointer.worldX
+        marking.yStop = pointer.worldY
+
+        const x = (marking.xStop + marking.xStart) / 2
+        const y = (marking.yStop + marking.yStart) / 2
+        const w = Math.abs(marking.xStop - marking.xStart)
+        const h = Math.abs(marking.yStop - marking.yStart)
+
+        markingRect.setX(x)
+        markingRect.setY(y)
+        markingRect.setSize(w, h)
+        markingRect.setOrigin(0.5, 0.5)
+      }
+    })
+  }
 }
