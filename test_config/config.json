@@ -11,6 +11,36 @@
         "SERVICE_TO_AUDIO2": {
             "code": "",
             "stage": "audio2"
+        },
+        "alt": {
+            "codes": {
+                "A": "initial",
+                "B": "alt_solved"
+            },
+            "hints": [
+                "'A' to rediscover",
+                "'B' to discover"
+            ]
+        },
+        "dep1": {
+            "code": "z",
+            "stage": "dep1_solved",
+            "hints": [
+                "Answer: 'z'",
+                "Nothing",
+                "Else",
+                "Here"
+            ],
+            "hint_button_names": [
+                "Answer",
+                "1",
+                "2",
+                "3"
+            ]
+        },
+        "dep2": {
+            "code": "x",
+            "stage": "dep2_solved"
         }
     },
     "stages": [
@@ -44,31 +74,31 @@
                     "objects": [
                         {
                             "id": "r1",
-                            "x": 0.5,
-                            "y": 0.2,
-                            "width": 0.5,
-                            "height": 0.1
+                            "x": 0.4976,
+                            "y": 0.3495,
+                            "width": 0.1765,
+                            "height": 0.0583
                         },
                         {
                             "id": "r2",
-                            "x": 0.5,
-                            "y": 0.4,
-                            "width": 0.5,
-                            "height": 0.1
+                            "x": 0.4995,
+                            "y": 0.4579,
+                            "width": 0.1801,
+                            "height": 0.0615
                         },
                         {
                             "id": "r3",
-                            "x": 0.5,
-                            "y": 0.6,
-                            "width": 0.5,
-                            "height": 0.1
+                            "x": 0.4976,
+                            "y": 0.5647,
+                            "width": 0.1765,
+                            "height": 0.0615
                         },
                         {
                             "id": "r4",
-                            "x": 0.5,
-                            "y": 0.8,
-                            "width": 0.5,
-                            "height": 0.1
+                            "x": 0.4976,
+                            "y": 0.6715,
+                            "width": 0.1765,
+                            "height": 0.0680
                         }
                     ],
                     "interactive": {
@@ -77,6 +107,76 @@
                                 "type": "enter_code",
                                 "puzzle": "SERVICE_TO_AUDIO",
                                 "code": ""
+                            }
+                        ],
+                        "r2": [
+                            {
+                                "type": "go_to_scene",
+                                "scene": "codes1"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "id": "codes1",
+                    "background": "Dependent on 2%0ANo hints%0AAnswer 'X'",
+                    "puzzle": "dep2",
+                    "puzzle_depends_on": [
+                        "dep1",
+                        "alt"
+                    ],
+                    "interactive": {
+                        "left": [
+                            {
+                                "type": "go_to_scene",
+                                "scene": "home"
+                            }
+                        ],
+                        "right": [
+                            {
+                                "type": "go_to_scene",
+                                "scene": "codes2"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "id": "codes2",
+                    "background": "Dependent on 1%0ACustom hints",
+                    "puzzle": "dep1",
+                    "puzzle_depends_on": [
+                        "alt"
+                    ],
+                    "interactive": {
+                        "left": [
+                            {
+                                "type": "go_to_scene",
+                                "scene": "codes1"
+                            }
+                        ],
+                        "right": [
+                            {
+                                "type": "go_to_scene",
+                                "scene": "codes3"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "id": "codes3",
+                    "background": "Alternative codes%0ACustom Wrong",
+                    "puzzle": "alt",
+                    "wrong_code_actions": [
+                        {
+                            "type": "show_text",
+                            "text": "Custom wrong code message"
+                        }
+                    ],
+                    "interactive": {
+                        "left": [
+                            {
+                                "type": "go_to_scene",
+                                "scene": "codes2"
                             }
                         ]
                     }
@@ -221,6 +321,33 @@
                     "https://ia902306.us.archive.org/21/items/OneHundredWays/pebble7.ogg"
                 ]
             }
+        },
+        {
+            "id": "alt_solved",
+            "load_actions": [
+                {
+                    "type": "show_text",
+                    "text": "Alt solved"
+                }
+            ]
+        },
+        {
+            "id": "dep1_solved",
+            "load_actions": [
+                {
+                    "type": "show_text",
+                    "text": "Dep 1 solved"
+                }
+            ]
+        },
+        {
+            "id": "dep2_solved",
+            "load_actions": [
+                {
+                    "type": "show_text",
+                    "text": "Dep 2 solved"
+                }
+            ]
         }
     ]
 }
