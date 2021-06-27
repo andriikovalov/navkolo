@@ -369,6 +369,7 @@ export default class Game extends Phaser.Scene {
     this.actionHandlers.delayed_actions = action => setTimeout(this.processActions, action.delay, action.next)
 
     this.actionHandlers.hide_interactive_elements = _ => this.hideCurrentInteractiveElements()
+    this.actionHandlers.show_interactive_elements = _ => this.showCurrentInteractiveElements()
 
     this.actionHandlers.redirect = action => window.location.replace(action.url)
   }

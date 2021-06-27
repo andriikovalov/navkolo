@@ -114,6 +114,12 @@
                                 "type": "go_to_scene",
                                 "scene": "codes1"
                             }
+                        ],
+                        "r3": [
+                            {
+                                "type": "go_to_scene",
+                                "scene": "vars"
+                            }
                         ]
                     }
                 },
@@ -177,6 +183,106 @@
                             {
                                 "type": "go_to_scene",
                                 "scene": "codes2"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "id": "vars",
+                    "background": "%2B1%0A-1%0AReset%0ACheck 0 - 2",
+                    "procedures": {
+                        "var_reset": [
+                            {
+                                "type": "grouped_actions",
+                                "next": [
+                                    {
+                                        "type": "set_variable",
+                                        "variable": "var",
+                                        "value": 0
+                                    },
+                                    {
+                                        "type": "show_text",
+                                        "text": "Variable is 0"
+                                    }
+                                ]
+                            }
+                        ],
+                        "refresh_objects": [
+                            {
+                                "type": "hide_interactive_elements"
+                            },
+                            {
+                                "type": "show_interactive_elements"
+                            }
+                        ]
+                    },
+                    "first_entry_actions": [
+                        {
+                            "type": "run_procedure",
+                            "procedure": "var_reset"
+                        }
+                    ],
+                    "interactive": {
+                        "left": [
+                            {
+                                "type": "go_to_scene",
+                                "scene": "home"
+                            }
+                        ],
+                        "r1": [
+                            {
+                                "type": "increment_variable",
+                                "variable": "var"
+                            },
+                            {
+                                "type": "run_procedure",
+                                "procedure": "refresh_objects"
+                            }
+                        ],
+                        "r2": [
+                            {
+                                "type": "increment_variable",
+                                "variable": "var",
+                                "increment": -1
+                            },
+                            {
+                                "type": "run_procedure",
+                                "procedure": "refresh_objects"
+                            }
+                        ],
+                        "r3": [
+                            {
+                                "type": "run_procedure",
+                                "procedure": "var_reset"
+                            }
+                        ],
+                        "r4": [
+                            {
+                                "guard": {
+                                    "type": "variable",
+                                    "variable": "var",
+                                    "value": 0
+                                },
+                                "type": "show_text",
+                                "text": "0"
+                            },
+                            {
+                                "guard": {
+                                    "type": "variable",
+                                    "variable": "var",
+                                    "value": 1
+                                },
+                                "type": "show_text",
+                                "text": "1"
+                            },
+                            {
+                                "guard": {
+                                    "type": "variable",
+                                    "variable": "var",
+                                    "value": 2
+                                },
+                                "type": "show_text",
+                                "text": "2"
                             }
                         ]
                     }
