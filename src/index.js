@@ -25,7 +25,9 @@ window.navkolo.default_config = {
   },
   width: 1366,
   height: 768,
-  scene: Game
+  scene: new Game()
 }
+
+window.navkolo.default_config.scene.loadGameConfig('config.json')
 
 window.navkolo.game = new Phaser.Game(window.navkolo.default_config)

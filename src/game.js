@@ -186,22 +186,21 @@ export default class Game extends Phaser.Scene {
   }
 
   create () {
-    this.createSvgUi()
-    this.createCodeInput()
-    this.createMessageBox()
-    this.createFadeRectangle()
-
-    this.registerActionHandlers()
-    this.registerGuardCheckers()
-
     if (this.gameConfigUrl) {
       this.gameConfig = this.cache.json.get('config')
     }
 
-    this.startGame()
+    this.registerActionHandlers()
+    this.registerGuardCheckers()
+
+    this.createCodeInput()
+    this.createMessageBox()
+    this.createFadeRectangle()
+
+    this.createSvgUiAndStartGame()
   }
 
-  createSvgUi () {
+  createSvgUiAndStartGame () {
     // Counts how many svg files we need to load, to remove the listener when we are done
     let svgImageQueued = 5
 
@@ -230,6 +229,7 @@ export default class Game extends Phaser.Scene {
       }
       if (svgImageQueued === 0) {
         this.textures.removeListener('addtexture', addTextureListener)
+        this.startGame()
       }
     }
 
@@ -643,7 +643,7 @@ export default class Game extends Phaser.Scene {
     if (this.gameState.currentSceneId !== null) {
       this.leaveCurrentScene()
     }
-    this.enter_scene(newSceneId)
+    this.enterScene(newSceneId)
   }
 
   leaveCurrentScene () {
