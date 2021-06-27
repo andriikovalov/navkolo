@@ -18,6 +18,10 @@ body {
     font-size: 32px;
 }
 
+.code_input_element {
+  margin: 3px;
+}
+
 .message_box {
     font-size: 32px;
 }

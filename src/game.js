@@ -304,7 +304,7 @@ export default class Game extends Phaser.Scene {
       this.submitCode()
     })
 
-    const hintButton = document.getElementById('hint_button_container').getElementsByTagName('button')[0]
+    const hintButton = document.getElementById('code_form').getElementsByTagName('button')[0]
     hintButton.addEventListener('pointerdown', this.hintButtonHandler.bind(this, 0))
   }
 
@@ -855,7 +855,7 @@ export default class Game extends Phaser.Scene {
     const codeInput = document.getElementById('code_input')
     codeInput.hidden = scene.hide_code_input
 
-    const hintButtonContainer = document.getElementById('hint_button_container')
+    const hintButtonContainer = document.getElementById('code_form')
     const hintButtonNames = this.getHintButtonNames(puzzle)
     this.updateButtons(hintButtonContainer, hintButtonNames, this.hintButtonHandler)
 
