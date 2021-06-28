@@ -324,8 +324,8 @@ export default class Game extends Phaser.Scene {
 
   messageBoxButtonHandler (index, event) {
     event.preventDefault()
-    const actions = this.nextActions[index]
-    this.nextActions = null
+    const actions = this.gameState.nextActions[index]
+    this.gameState.nextActions = null
     this.uiElements.message.setVisible(false)
     this.showCurrentInteractiveElements()
     this.processActions(actions)
@@ -366,7 +366,7 @@ export default class Game extends Phaser.Scene {
 
     this.actionHandlers.grouped_actions = action => this.processActions(action.next)
     this.actionHandlers.run_procedure = action => this.processActions(this.gameDescription.procedures[action.procedure])
-    this.actionHandlers.delayed_actions = action => setTimeout(this.processActions, action.delay, action.next)
+    this.actionHandlers.delayed_actions = action => setTimeout(this.processActions.bind(this), action.delay, action.next)
 
     this.actionHandlers.hide_interactive_elements = _ => this.hideCurrentInteractiveElements()
     this.actionHandlers.show_interactive_elements = _ => this.showCurrentInteractiveElements()
@@ -854,10 +854,10 @@ export default class Game extends Phaser.Scene {
     const puzzle = scene.puzzle
 
     const codeInput = document.getElementById('code_input')
-    codeInput.hidden = scene.hide_code_input
+    codeInput.hidden = this.isCodeInputHidden()
 
     const hintButtonContainer = document.getElementById('code_form')
-    const hintButtonNames = this.getHintButtonNames(puzzle)
+    const hintButtonNames = this.getHintButtonNames()
     this.updateButtons(hintButtonContainer, hintButtonNames, this.hintButtonHandler)
 
     this.uiElements.input.node.style.display = 'block'
@@ -880,7 +880,9 @@ export default class Game extends Phaser.Scene {
     }
   }
 
-  getHintButtonNames (puzzle) {
+  getHintButtonNames () {
+    const scene = this.currentScene()
+    const puzzle = scene.puzzle
     const puzzleConfig = this.gameConfig.puzzles[puzzle]
     if ('hint_button_names' in puzzleConfig) {
       return puzzleConfig.hint_button_names
@@ -890,6 +892,14 @@ export default class Game extends Phaser.Scene {
     } else {
       return []
     }
+  }
+
+  isCodeInputHidden () {
+    const scene = this.currentScene()
+    const puzzle = scene.puzzle
+    const puzzleConfig = this.gameConfig.puzzles[puzzle]
+
+    return puzzleConfig.hide_code_input
   }
 
   setCodeInputElementsDisabled (value) {
