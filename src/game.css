@@ -36,8 +36,5 @@ body {
 
 .message_box_button {
   font-size: 32px;
-}
-
-.message_box audio {
-  width: 100%;
+  margin: 3px;
 }
