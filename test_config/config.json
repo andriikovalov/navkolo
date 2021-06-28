@@ -50,6 +50,21 @@
                 "is",
                 "x"
             ]
+        },
+        "no_input": {
+            "hide_code_input": true,
+            "hints": [
+                "A",
+                "B",
+                "C"
+            ]
+        },
+        "block": {
+            "hints": [
+                "No",
+                "Correct",
+                "Answers"
+            ]
         }
     },
     "stages": [
@@ -158,6 +173,12 @@
                             {
                                 "type": "go_to_scene",
                                 "scene": "switch"
+                            }
+                        ],
+                        "r3": [
+                            {
+                                "type": "go_to_scene",
+                                "scene": "blocking"
                             }
                         ]
                     }
@@ -434,6 +455,194 @@
                             {
                                 "type": "go_to_scene",
                                 "scene": "switch"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "id": "blocking",
+                    "background": "%0A",
+                    "puzzle": "no_input",
+                    "first_entry_actions": [
+                        {
+                            "type": "blocking_text",
+                            "text": "Blocking with default button name",
+                            "next": [
+                                {
+                                    "type": "blocking_text",
+                                    "text": "Long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long text with custom button",
+                                    "button": "Click me",
+                                    "next": []
+                                }
+                            ]
+                        }
+                    ],
+                    "interactive": {
+                        "left": [
+                            {
+                                "type": "go_to_scene",
+                                "scene": "home2"
+                            }
+                        ],
+                        "right": [
+                            {
+                                "type": "go_to_scene",
+                                "scene": "blocking2"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "id": "blocking2",
+                    "background": "Alternative%0A%0A%0A",
+                    "entry_actions": [
+                        {
+                            "type": "alternative",
+                            "text": "Alternative",
+                            "buttons": [
+                                "Fade In",
+                                "Fade Out",
+                                "Countdown Redirect"
+                            ],
+                            "alternatives": [
+                                [
+                                    {
+                                        "type": "background_fade_tween",
+                                        "tween": {
+                                            "alpha": {
+                                                "start": 1,
+                                                "to": 0
+                                            },
+                                            "fillColor": {
+                                                "start": 16777215,
+                                                "to": 16777215
+                                            },
+                                            "delay": 1000,
+                                            "duration": 1000
+                                        }
+                                    },
+                                    {
+                                        "type": "show_text",
+                                        "text": "Message still readable"
+                                    }
+                                ],
+                                [
+                                    {
+                                        "type": "background_fade_tween",
+                                        "tween": {
+                                            "alpha": {
+                                                "start": 0,
+                                                "to": 1
+                                            },
+                                            "fillColor": {
+                                                "start": 0,
+                                                "to": 0
+                                            },
+                                            "duration": 1000,
+                                            "yoyo": true
+                                        }
+                                    }
+                                ],
+                                [
+                                    {
+                                        "type": "show_text",
+                                        "text": "Redirect in 3"
+                                    },
+                                    {
+                                        "type": "delayed_actions",
+                                        "delay": 1000,
+                                        "next": [
+                                            {
+                                                "type": "show_text",
+                                                "text": "Redirect in 2"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "delayed_actions",
+                                        "delay": 2000,
+                                        "next": [
+                                            {
+                                                "type": "show_text",
+                                                "text": "Redirect in 1"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "delayed_actions",
+                                        "delay": 3000,
+                                        "next": [
+                                            {
+                                                "type": "show_text",
+                                                "text": "Redirecting ..."
+                                            },
+                                            {
+                                                "type": "redirect",
+                                                "url": "https://wikipedia.org"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            ]
+                        }
+                    ],
+                    "interactive": {
+                        "left": [
+                            {
+                                "type": "go_to_scene",
+                                "scene": "blocking"
+                            }
+                        ],
+                        "right": [
+                            {
+                                "type": "go_to_scene",
+                                "scene": "blocking3"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "id": "blocking3",
+                    "background": "%0A",
+                    "puzzle": "block",
+                    "entry_actions": [
+                        {
+                            "type": "blocking_text",
+                            "text": "Big background object",
+                            "next": []
+                        }
+                    ],
+                    "objects": [
+                        {
+                            "id": "big",
+                            "x": 0.5,
+                            "y": 0.5,
+                            "width": 1,
+                            "height": 1
+                        }
+                    ],
+                    "interactive": {
+                        "left": [
+                            {
+                                "type": "go_to_scene",
+                                "scene": "blocking2"
+                            }
+                        ],
+                        "big": [
+                            {
+                                "type": "background_fade_tween",
+                                "tween": {
+                                    "alpha": {
+                                        "start": 0,
+                                        "to": 1
+                                    },
+                                    "fillColor": {
+                                        "start": 16777215,
+                                        "to": 16777215
+                                    },
+                                    "duration": 100,
+                                    "yoyo": true
+                                }
                             }
                         ]
                     }

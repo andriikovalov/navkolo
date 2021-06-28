@@ -257,6 +257,7 @@ export default class Game extends Phaser.Scene {
     arrow.object_type = 'arrow'
     const arrowSize = 0.0833 * this.gameWidth()
     arrow.setDisplaySize(arrowSize, arrowSize)
+    arrow.setDepth(1)
     this.addArrowHover(arrow)
     arrow.on('pointerdown', (pointer, localX, localY, event) => {
       this.objectClicked(objectName)
