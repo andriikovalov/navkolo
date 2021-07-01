@@ -28,4 +28,4 @@ Alternatively, create and start a `Phaser.Game` with a config in which `scene` i
 
 ## License
 
-This project is licensed under the MIT License - see [LICENSE.md](LICENSE.md) for details.
+This project is licensed under the MIT License - see [LICENSE](LICENSE) for details.
