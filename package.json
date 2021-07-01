@@ -22,8 +22,13 @@
   },
   "browser": "src/index.js",
   "scripts": {
-    "build": "webpack --config webpack/prod.js "
+    "build": "webpack --config webpack/prod.js",
+    "build-base": "webpack --config webpack/base.js"
   },
+  "files": [
+    "dist",
+    "src"
+  ],
   "devDependencies": {
     "@babel/core": "^7.13.16",
     "@babel/preset-env": "^7.13.15",

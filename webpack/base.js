@@ -3,6 +3,9 @@ const webpack = require('webpack')
 module.exports = {
   mode: 'development',
   devtool: 'eval-source-map',
+  output: {
+    filename: 'navkolo.js'
+  },
   module: {
     rules: [
       {
