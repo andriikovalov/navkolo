@@ -1,11 +1,15 @@
 {
   "name": "navkolo",
   "version": "1.0.0-dev",
-  "description": "A library for making adventure/puzzle games based on Phaser3",
-  "main": "src/index.js",
-  "scripts": {
-    "build": "webpack --config webpack/prod.js "
-  },
+  "description": "A library for making escape room-like puzzle/adventure games based on Phaser 3.",
+  "keywords": [
+    "game",
+    "puzzle",
+    "escape room",
+    "HTML5",
+    "phaser"
+  ],
+  "homepage": "https://github.com/andriikovalov/navkolo#readme",
   "repository": {
     "type": "git",
     "url": "https://github.com/andriikovalov/navkolo"
@@ -16,7 +20,10 @@
   "bugs": {
     "url": "https://github.com/andriikovalov/navkolo/issues"
   },
-  "homepage": "https://github.com/andriikovalov/navkolo#readme",
+  "browser": "src/index.js",
+  "scripts": {
+    "build": "webpack --config webpack/prod.js "
+  },
   "devDependencies": {
     "@babel/core": "^7.13.16",
     "@babel/preset-env": "^7.13.15",
@@ -27,7 +34,6 @@
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.3.1",
-    "html-webpack-plugin": "^5.3.1",
     "phaser": "3.52.0",
     "style-loader": "^2.0.0",
     "webpack": "^5.35.1",

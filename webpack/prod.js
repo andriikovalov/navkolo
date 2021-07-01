@@ -2,7 +2,7 @@ const { merge } = require('webpack-merge')
 const base = require('./base')
 
 module.exports = merge(base, {
-  // mode: 'production',
+  mode: 'production',
   output: {
     filename: 'bundle.min.js',
     clean: true
