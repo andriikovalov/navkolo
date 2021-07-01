@@ -12,7 +12,7 @@ npm install navkolo
 
 ### CDN
 
-Get if from [jsDelivr](https://www.jsdelivr.com/).
+Get if from [jsDelivr](https://cdn.jsdelivr.net/npm/navkolo@1.0.0/dist/navkolo.min.js).
 
 ## Starting a game
 
