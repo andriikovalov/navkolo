@@ -10,3 +10,4 @@ node_modules/
 # Build
 dist/
 /npm-debug.log
+test_config/bundle.min.js
