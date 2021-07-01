@@ -22,10 +22,10 @@ To start a navkolo game, call
 window.Navkolo.start(phaserConfig, gameConfigUrl, gameConfig)
 ```
 
-Either `gameConfigUrl` or `gameConfig` should be passed. An example config is in <test_config/config.json>
+Either `gameConfigUrl` or `gameConfig` should be passed. An example config is in [](test_config/config.json)
 
 Alternatively, create and start a `Phaser.Game` with a config in which `scene` is a `Navkolo.Game` (or its subclass).
 
 ## License
 
-This project is licensed under the MIT License - see <LICENSE.md> for details.
+This project is licensed under the MIT License - see [](LICENSE.md) for details.
