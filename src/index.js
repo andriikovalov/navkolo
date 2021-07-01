@@ -3,19 +3,12 @@ import Game from './game'
 
 import './game.css'
 
-const GAME_CONTAINER_DIV_ID = 'game-container'
+window.Navkolo = {}
+window.Navkolo.Game = Game
 
-if (!document.getElementById(GAME_CONTAINER_DIV_ID)) {
-  const gameContainer = document.createElement('div')
-  gameContainer.id = GAME_CONTAINER_DIV_ID
-  document.body.appendChild(gameContainer)
-}
-
-window.navkolo = {}
-
-window.navkolo.default_config = {
+window.Navkolo.defaultConfig = {
   type: Phaser.AUTO,
-  parent: GAME_CONTAINER_DIV_ID,
+  parent: 'game-container',
   dom: {
     createContainer: true
   },
@@ -24,10 +17,29 @@ window.navkolo.default_config = {
     autoCenter: Phaser.Scale.CENTER_BOTH
   },
   width: 1366,
-  height: 768,
-  scene: new Game()
+  height: 768
 }
 
-window.navkolo.default_config.scene.loadGameConfig('config.json')
+/**
+ * Creates and starts a navkolo game. Either `gameConfig` or `gameConfigUrl` must be passed.
+ * The created game is stored in `window.Navkolo.game`.
+ * @param {Object} phaserConfig phaser game config (without `scene` key). Should have `dom` with `createContainer = true` and `parent` properties.
+ * @param {string} gameConfigUrl URL of a JSON file with a navkolo game configuration.
+ * @param {Object} gameConfig JSON navkolo game configuration with puzzles and stages.
+ */
+window.Navkolo.start = (phaserConfig, gameConfigUrl, gameConfig) => {
+  // Add game container if it is absent
+  const gameContainerId = phaserConfig.parent
+  if (!document.getElementById(gameContainerId)) {
+    const gameContainer = document.createElement('div')
+    gameContainer.id = gameContainerId
+    document.body.appendChild(gameContainer)
+  }
 
-window.navkolo.game = new Phaser.Game(window.navkolo.default_config)
+  phaserConfig.scene = new Game(gameConfig)
+  if (gameConfigUrl) {
+    phaserConfig.scene.loadGameConfig(gameConfigUrl)
+  }
+
+  window.Navkolo.game = new Phaser.Game(phaserConfig)
+}
