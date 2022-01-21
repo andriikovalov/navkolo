@@ -12,7 +12,7 @@ npm install navkolo
 
 ### CDN
 
-Get if from [jsDelivr](https://cdn.jsdelivr.net/npm/navkolo@1.0.0/dist/navkolo.min.js).
+Get if from [jsDelivr](https://cdn.jsdelivr.net/npm/navkolo@latest/dist/navkolo.min.js).
 
 ## Starting a game
 
@@ -25,6 +25,24 @@ window.Navkolo.start(phaserConfig, gameConfigUrl, gameConfig)
 Either `gameConfigUrl` or `gameConfig` should be passed. An example config is in [test_config/config.json](test_config/config.json)
 
 Alternatively, create and start a `Phaser.Game` with a config in which `scene` is a `Navkolo.Game` (or its subclass).
+
+## Development
+
+### Building js file
+
+```bash
+npm run build
+```
+
+### Local testing
+
+```bash
+cp dist/navkolo.min.js test_config
+cd test_config
+python3 -m http.server
+```
+
+The test configuration will be served from the local web server from python.
 
 ## License
 
