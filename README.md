@@ -44,6 +44,13 @@ python3 -m http.server
 
 The test configuration will be served from the local web server from python.
 
+### Publishing new version
+
+1. Make a change, build minified js file and and test it locally
+2. Update version in `package.json`
+3. Run `npm publish`
+4. Add a version tag in git
+
 ## License
 
 This project is licensed under the MIT License - see [LICENSE](LICENSE) for details.
