@@ -1,6 +1,6 @@
 {
   "name": "navkolo",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A library for making escape room-like puzzle/adventure games based on Phaser 3.",
   "keywords": [
     "game",

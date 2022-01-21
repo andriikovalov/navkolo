@@ -317,6 +317,7 @@ export default class Game extends Phaser.Scene {
     messageBoxStyle.width = (0.8 * this.gameWidth()) + 'px'
     messageBox.setDepth(100)
     messageBox.setVisible(false)
+    document.getElementById('message_area').style.maxHeight = (0.6 * this.gameHeight()) + 'px'
 
     // Initially there is only one button. If more buttons are needed later, they are added dynamically
     const messageBoxButton = document.getElementById('message_box_button_container').getElementsByTagName('button')[0]
@@ -678,6 +679,7 @@ export default class Game extends Phaser.Scene {
     this.hideMessageIfOpen()
     const messageBox = this.uiElements.message
     document.getElementById('message').innerHTML = text
+    document.getElementById('message_area').scrollTop = 0
     document.getElementById('message_box_button_container').hidden = true
 
     messageBox.node.style.display = 'block'
@@ -712,6 +714,7 @@ export default class Game extends Phaser.Scene {
   showBlockingMessage (text, alternativeActions, buttonNames) {
     const messageBox = this.uiElements.message
     document.getElementById('message').innerHTML = text
+    document.getElementById('message_area').scrollTop = 0
     const buttonContainer = document.getElementById('message_box_button_container')
     buttonContainer.hidden = false
     this.updateButtons(buttonContainer, buttonNames, this.messageBoxButtonHandler)

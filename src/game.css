@@ -30,6 +30,10 @@ body {
   padding: 20px;
 }
 
+#message_area {
+  overflow-y: auto;
+}
+
 #message_box_button_container {
   text-align: center;
 }
